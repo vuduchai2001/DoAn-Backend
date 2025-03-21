@@ -1,0 +1,12 @@
+services:
+  redis:
+    image: redis:7.2.4-bookworm
+    platform: linux/x86_64
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
