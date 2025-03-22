@@ -7,6 +7,87 @@ services:
       - 6379:6379
     volumes:
       - redis_data:/data
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - '6333:6333'
+      - '6334:6334'
+    volumes:
+      - qdrant_data:/qdrant/storage:z
+  mongo1:
+    image: mongo:7.0
+    command: ['--replSet', 'rs0', '--bind_ip_all', '--port', '27017']
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - 'mongo1_data:/data/db'
+      - 'mongo1_config:/data/configdb'
+
+  mongo2:
+    image: mongo:7.0
+    command: ['--replSet', 'rs0', '--bind_ip_all', '--port', '27018']
+    restart: unless-stopped
+    ports:
+      - 27018:27018
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - 'mongo2_data:/data/db'
+      - 'mongo2_config:/data/configdb'
+
+  mongo3:
+    image: mongo:7.0
+    command: ['--replSet', 'rs0', '--bind_ip_all', '--port', '27019']
+    restart: unless-stopped
+    ports:
+      - 27019:27019
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - 'mongo3_data:/data/db'
+      - 'mongo3_config:/data/configdb'
+
+  mongoclient:
+    image: mongo:7.0
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        echo "Starting replica set initialize"
+        until mongosh --host mongo1 --eval "print(\"waited for connection\")"
+        do
+            sleep 2
+        done
+        echo "Connection finished"
+        echo "Creating replica set"
+        mongosh --host mongo1 <<EOF
+        rs.initiate(
+            {
+            _id : 'rs0',
+            members: [
+                { _id : 0, host : "host.docker.internal:27017", priority: 1 },
+                { _id : 1, host : "host.docker.internal:27018", priority: 0.5 },
+                { _id : 2, host : "host.docker.internal:27019", priority: 0.5 }
+            ]
+            }
+        )
+        EOF
+        echo "replica set created"
+    restart: 'no'
 
 volumes:
   redis_data:
+  qdrant_data:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+  mongo1_config:
+  mongo2_config:
+  mongo3_config:
