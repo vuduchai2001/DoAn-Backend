@@ -6,6 +6,7 @@ import { redisStore } from 'cache-manager-redis-yet'
 import { CacheModule } from '@nestjs/cache-manager'
 import { BullModule, BullModuleOptions } from '@nestjs/bull'
 import { LoggerModule } from 'nestjs-pino'
+import { MongooseModule } from '@nestjs/mongoose'
 
 @Module({
   imports: [
@@ -54,6 +55,13 @@ import { LoggerModule } from 'nestjs-pino'
           maxStalledCount: configService.get<number>('REDIS_QUEUE_MAX_STALLED_COUNT'),
           lockDuration: configService.get<number>('REDIS_QUEUE_LOCK_DURATION'),
         },
+      }),
+      inject: [ConfigService],
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('DATABASE_URI'),
+        dbName: configService.get<string>('DATABASE_NAME'),
       }),
       inject: [ConfigService],
     }),
