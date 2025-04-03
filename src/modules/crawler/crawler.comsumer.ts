@@ -1,8 +1,8 @@
 import { Processor } from '@nestjs/bull'
-import { CRAWLER_QUEUE } from './dto/crawler.enum'
+import { WEBSITE_CRAWLER_QUEUE } from './dto/crawler.enum'
 import { Logger } from '@nestjs/common'
 
-@Processor(CRAWLER_QUEUE)
+@Processor(WEBSITE_CRAWLER_QUEUE)
 export class CrawlerConsumer {
   constructor() {}
 

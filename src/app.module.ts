@@ -2,12 +2,15 @@ import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { redisStore } from 'cache-manager-redis-yet'
 import { CacheModule } from '@nestjs/cache-manager'
 import { BullModule, BullModuleOptions } from '@nestjs/bull'
 import { LoggerModule } from 'nestjs-pino'
 import { MongooseModule } from '@nestjs/mongoose'
-
+import { CrawlerModule } from './modules/crawler/crawler.module'
+import { ChatbotModule } from './modules/chatbot/chatbot.module'
+import { APP_GUARD } from '@nestjs/core'
+import { ChatbotGuard } from './common/guard/chatbot.guard'
+import { redisStore } from 'cache-manager-redis-yet'
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -65,8 +68,10 @@ import { MongooseModule } from '@nestjs/mongoose'
       }),
       inject: [ConfigService],
     }),
+    CrawlerModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ChatbotGuard }],
 })
 export class AppModule {}

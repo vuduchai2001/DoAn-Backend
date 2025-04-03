@@ -55,7 +55,7 @@ export class ExtractService {
 
       const { embeddingTokens, splitDocs } = await this.splitDocs(
         docs,
-        uploadededFile.uploadedFileID.toString(),
+        uploadededFile.uploadedFileID?.toString(),
         chatbotId,
         IngestionType.File,
       )

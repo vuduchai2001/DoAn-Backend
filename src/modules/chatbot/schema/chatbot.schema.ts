@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
 
 @Schema({
   collection: 'chatbots',
@@ -8,11 +7,11 @@ import { Document } from 'mongoose'
     virtuals: true,
   },
 })
-export class Chatbot extends Document {
+export class Chatbot {
   @Prop({ required: true })
   name: string
 
-  @Prop()
+  @Prop({ default: null })
   lastTrained: Date
 
   @Prop({
@@ -22,10 +21,10 @@ export class Chatbot extends Document {
   })
   themeColor: string
 
-  @Prop({ type: String, maxlength: 250 })
+  @Prop({ type: String, maxlength: 250, required: false })
   connectedResponse: string
 
-  @Prop({ type: String, maxlength: 250 })
+  @Prop({ type: String, maxlength: 250, required: false })
   questionInputPrompt: string
 
   @Prop()

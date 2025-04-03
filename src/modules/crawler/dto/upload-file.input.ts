@@ -8,9 +8,7 @@ const INGESTION_FILE_SUPPORTED_FORMATS = ['pdf', 'txt', 'docx', 'json', 'csv', '
 // const INGESTION_FILE_MAX_SIZE_MB = FASTIFY_MULTIPART_MAX_FILE_SIZE
 // 100MB
 
-interface IngestionFile extends Express.Multer.File {
-  uploadFilepath: string
-}
+// interface IngestionFile extends Express.Multer.File {}
 
 export class UploadedFileDetails {
   filepath: string
@@ -22,11 +20,10 @@ export class UploadedFileDetails {
   mimetype: string
   uploadedFileID: Types.ObjectId
   embeddingTokens: number
-  lang: string[]
   private readonly logger = new Logger(UploadedFileDetails.name)
 
-  constructor(file: IngestionFile) {
-    const fileFormat = file.filename.split('.').pop().toLowerCase()
+  constructor(file: Express.Multer.File) {
+    const fileFormat = file.originalname.split('.').pop().toLowerCase()
     const isFileFormatSupported = INGESTION_FILE_SUPPORTED_FORMATS.includes(fileFormat)
 
     if (!isFileFormatSupported) {
@@ -34,9 +31,9 @@ export class UploadedFileDetails {
     }
 
     this.fieldname = file.fieldname
-    this.filepath = file.path
+    this.filepath = '/home/ha1/Desktop/test.txt'
     this.filename = file.filename
-    this.uploadFilepath = file.uploadFilepath
+    // this.uploadFilepath = file.uploadFilepath
     this.format = fileFormat
     this.encoding = file.encoding
     this.mimetype = file.mimetype
