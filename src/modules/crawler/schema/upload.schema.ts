@@ -6,10 +6,10 @@ import { ObjectId } from 'mongodb'
 @Schema({ collection: 'uploaded_files', timestamps: true })
 export class UploadedFile extends Document {
   @Prop({ required: true })
-  fileName: string
+  filename: string
 
   @Prop({ required: true, default: '' })
-  path: string
+  filepath: string
 
   @Prop({ required: true })
   mimetype: string

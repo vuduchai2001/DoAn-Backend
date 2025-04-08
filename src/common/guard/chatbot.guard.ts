@@ -18,16 +18,13 @@ export class ChatbotGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
 
-    const chatbotId = await this.cacheManager.get<string>(`${CHATBOT_CACHE.PREFIX}`)
+    let chatbotId = await this.cacheManager.get<string>(`${CHATBOT_CACHE.PREFIX}`)
 
     if (!chatbotId) {
       const chatbot = await this.chatbotModel.findOne({}).lean()
-
-      await this.cacheManager.set(`${CHATBOT_CACHE.PREFIX}`, chatbot._id.toString(), CHATBOT_CACHE.TTL)
-    }
-
-    if (!chatbotId) {
-      throw new UnauthorizedException('Invalid Chatbot ID')
+      if (!chatbot) throw new UnauthorizedException('Invalid Chatbot ID')
+      chatbotId = chatbot._id?.toString()
+      await this.cacheManager.set(`${CHATBOT_CACHE.PREFIX}`, chatbotId, CHATBOT_CACHE.TTL)
     }
 
     request['chatbotId'] = chatbotId

@@ -1,35 +1,54 @@
-import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { UploadedFileDetails } from './dto/upload-file.input'
-import { ExtractService } from './extract.service'
-import { QdrantVectorStore } from '@langchain/qdrant'
-import { OpenAIEmbeddings } from '@langchain/openai'
+import { ChatbotID } from '@/src/common/decorator/chatbot.decorator'
+import { FileValidationExceptionFilter } from '@/src/common/exception/file.exception'
+import {
+  Controller,
+  HttpStatus,
+  ParseFilePipeBuilder,
+  Post,
+  UploadedFiles,
+  UseFilters,
+  UseInterceptors,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { embeddingModel } from '../chatbot/chatbot.config'
+import { FilesInterceptor } from '@nestjs/platform-express'
+import { ObjectId } from 'bson'
+import { CrawlerService } from './crawler.service'
+import { ACCESS_FILE, FILE_EXTRACT_JOB, FILE_TRAINING_QUEUE } from './dto/crawler.enum'
+import { InjectQueue } from '@nestjs/bull'
+import { Queue } from 'bull'
 
 @Controller('crawler')
 export class CrawlerController {
-  private openAIEmbedding: OpenAIEmbeddings
-
   constructor(
-    private readonly extractService: ExtractService,
     private readonly configService: ConfigService,
-  ) {
-    this.openAIEmbedding = new OpenAIEmbeddings({
-      openAIApiKey: this.configService.get<string>('OPEN_AI_KEY'),
-      modelName: embeddingModel,
-    })
-  }
+    private readonly crawlerService: CrawlerService,
+    @InjectQueue(FILE_TRAINING_QUEUE) private readonly fileTrainingConsumer: Queue,
+  ) {}
 
-  @Post('')
-  @UseInterceptors(FileInterceptor('file'))
-  async test(@UploadedFile() file: Express.Multer.File) {
-    const uploadedFileDetails = new UploadedFileDetails(file)
-    const extractedDocs = await this.extractService.extractText(uploadedFileDetails, '67ee8491e8511082621c1217')
-    await QdrantVectorStore.fromDocuments(extractedDocs, this.openAIEmbedding, {
-      url: this.configService.get<string>('QDRANT'),
-      collectionName: 'ingestion',
-      metadataPayloadKey: 'mongo_metadata',
-    })
+  @Post('upload-files')
+  @UseInterceptors(FilesInterceptor('files'))
+  @UseFilters(FileValidationExceptionFilter)
+  async test(
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: ACCESS_FILE,
+        })
+        .addMaxSizeValidator({ maxSize: 1024 * 1024 * 100 }) //100MB
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY, fileIsRequired: false }),
+    )
+    files: Express.Multer.File[],
+    @ChatbotID() chatbotId: ObjectId,
+  ) {
+    for (const file of files) {
+      const uploadedFile = await this.crawlerService.saveUploadedFile(file, chatbotId)
+      await this.fileTrainingConsumer.add(
+        FILE_EXTRACT_JOB,
+        { fileDetails: uploadedFile, chatbotId: chatbotId.toString() },
+        { removeOnFail: true },
+      )
+    }
+
+    return { message: 'Training Successfully' }
   }
 }

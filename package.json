@@ -38,6 +38,7 @@
     "@nestjs/mongoose": "^11.0.2",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/websockets": "^11.0.12",
+    "bson": "^6.10.3",
     "bull": "^4.16.5",
     "cache-manager": "5.4.0",
     "cache-manager-redis-yet": "^5.1.5",

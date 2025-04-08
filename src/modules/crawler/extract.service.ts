@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
 import { Document } from '@langchain/core/documents'
-import { UploadedFileDetails } from './dto/upload-file.input'
 import { CSVLoader } from '@langchain/community/document_loaders/fs/csv'
 import { DocxLoader } from '@langchain/community/document_loaders/fs/docx'
 import { JSONLoader } from 'langchain/document_loaders/fs/json'
@@ -10,6 +9,7 @@ import { encodingForModel } from '@langchain/core/utils/tiktoken'
 import { modelNameTokens } from '../chatbot/chatbot.config'
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { ChunkOverlap, ChunkSize, IngestionType } from './dto/crawler.enum'
+import { UploadedFile } from './schema/upload.schema'
 
 export interface splitDocsInterface {
   embeddingTokens: number
@@ -21,8 +21,9 @@ export class ExtractService {
   constructor() {}
   private readonly logger = new Logger(ExtractService.name)
 
-  private async initLoader(uploadededFile: UploadedFileDetails) {
-    switch (uploadededFile.format) {
+  private async initLoader(uploadededFile: UploadedFile) {
+    const fileFormat = uploadededFile.filename.split('.').pop().toLowerCase()
+    switch (fileFormat) {
       case 'pdf':
         return new PDFLoader(uploadededFile.filepath)
       case 'txt':
@@ -34,12 +35,11 @@ export class ExtractService {
       case 'csv':
         return new CSVLoader(uploadededFile.filepath)
       default:
-        throw new Error(`Cannot extract text from file format: ${uploadededFile.format}`)
+        throw new Error(`Cannot extract text from file format: ${fileFormat}`)
     }
   }
 
-  async extractText(uploadededFile: UploadedFileDetails, chatbotId: string): Promise<Document[]> {
-    const startTime = Date.now()
+  async extractText(uploadededFile: UploadedFile, chatbotId: string): Promise<Document[]> {
     const loader = await this.initLoader(uploadededFile)
 
     try {
@@ -49,13 +49,13 @@ export class ExtractService {
       } catch (error) {
         this.logger.error('Error when loading loader', error)
         throw new InternalServerErrorException(
-          `Unable to process file: The file content is corrupted or in an incorrect ${uploadededFile.format} format`,
+          `Unable to process file: The file content is corrupted or in an incorrect ${uploadededFile.filename}`,
         )
       }
 
       const { embeddingTokens, splitDocs } = await this.splitDocs(
         docs,
-        uploadededFile.uploadedFileID?.toString(),
+        uploadededFile._id?.toString(),
         chatbotId,
         IngestionType.File,
       )
@@ -63,31 +63,23 @@ export class ExtractService {
       if (!splitDocs || splitDocs.length === 0) {
         throw new NotFoundException('Not found text in this file')
       }
-      const endTime = Date.now()
-      this.logger.log(`extractText took ${endTime - startTime} ms`)
       return splitDocs
     } catch (error) {
-      this.logger.debug(`Failed to extract text from ${uploadededFile.format}`, error.stack)
-      const endTime = Date.now()
-      this.logger.log(`extractText took ${endTime - startTime} ms`)
+      this.logger.debug(`Failed to extract text from ${uploadededFile.filename}`, error.stack)
       throw error
     }
   }
 
   async addMetada(docs: Document[], fileID: string, chatbotId: string, fileType: string): Promise<Document[]> {
-    const startTime = Date.now()
     for (const _doc of docs) {
-      _doc.metadata['uploadedFileID'] = fileID
+      _doc.metadata['uploadedFileId'] = fileID
       _doc.metadata['chatbotId'] = chatbotId
       _doc.metadata['type'] = fileType
     }
-    const endTime = Date.now()
-    this.logger.log(`addMetada took ${endTime - startTime} ms`)
     return docs
   }
 
   async countEmbeddingTokens(docs: Document[]): Promise<number> {
-    const startTime = Date.now()
     let embeddingTokens = 0
 
     for (const _doc of docs) {
@@ -95,16 +87,10 @@ export class ExtractService {
       if (!text) {
         continue
       } else {
-        // TODO: Move out of loop
-        const startTimeEncoding = Date.now()
         const enc = await encodingForModel(modelNameTokens)
         embeddingTokens += enc.encode(text).length
-        const endTimeEncoding = Date.now()
-        this.logger.log(`encodingForModel took ${endTimeEncoding - startTimeEncoding} ms`)
       }
     }
-    const endTime = Date.now()
-    this.logger.log(`countEmbeddingTokens took ${endTime - startTime} ms`)
     return embeddingTokens
   }
 

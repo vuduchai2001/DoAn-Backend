@@ -9,6 +9,8 @@ export enum TrainingStatus {
 
 //Queue config
 export const WEBSITE_CRAWLER_QUEUE = 'website-crawler-queue'
+export const FILE_TRAINING_QUEUE = 'file-training-queue'
+
 export const WEBSITE_EXTRACT_JOB = 'website-extract-job'
 export const FILE_EXTRACT_JOB = 'file-extract-job'
 export const WEBSITE_TRAINING_JOB = 'website-training-job'
@@ -21,3 +23,7 @@ export enum IngestionType {
   File = 'file',
   Website = 'website',
 }
+
+// pdf, txt, json, csv, docx
+export const ACCESS_FILE =
+  /^(application\/pdf|text\/plain|application\/json|text\/csv|application\/vnd.openxmlformats-officedocument.wordprocessingml.document)$/
