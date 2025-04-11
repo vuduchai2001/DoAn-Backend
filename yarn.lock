@@ -1195,6 +1195,14 @@
     path-to-regexp "8.2.0"
     tslib "2.8.1"
 
+"@nestjs/platform-socket.io@^11.0.16":
+  version "11.0.16"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-socket.io/-/platform-socket.io-11.0.16.tgz#315378577c28a4bf268a211464a26277559f6111"
+  integrity sha512-Nzu2rOP6/7cNuSwfiJms72GLWgbY5Y8CEY9g3SDZ3cpypW42xqrRCBFgYrOA8yNox3eoHCITy+2y5FcWDWHIgg==
+  dependencies:
+    socket.io "4.8.1"
+    tslib "2.8.1"
+
 "@nestjs/schematics@^11.0.0", "@nestjs/schematics@^11.0.1":
   version "11.0.2"
   resolved "https://registry.yarnpkg.com/@nestjs/schematics/-/schematics-11.0.2.tgz#0ee0aba704b14c2b933d0a04dcdfe5203b70469b"
@@ -1213,10 +1221,10 @@
   dependencies:
     tslib "2.8.1"
 
-"@nestjs/websockets@^11.0.12":
-  version "11.0.13"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-11.0.13.tgz#b708f2d615c0f0084cc6d839e7c9fe4711a66d26"
-  integrity sha512-QvWImf/2+UHzw+OCDkrdJ9y3sH4thcbHxCgTlr9EiGOR9z85M14IIHhLpx4fse0xAqHYw/FDyCOLpszwiiZnFA==
+"@nestjs/websockets@^11.0.16":
+  version "11.0.16"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-11.0.16.tgz#92d1b4fbe34c33e92a837cfed2dc0df4cc3ce2af"
+  integrity sha512-ZgAkcPkpxykYF38qbDbmXrw16ufv45WoxAJZDyuYK+lhkS3N2Ky455gsdTHe9uP9YQbLqDm/JBZ8lF3Qsh+t+g==
   dependencies:
     iterare "1.2.1"
     object-hash "3.0.0"
@@ -6115,7 +6123,7 @@ socket.io-parser@~4.2.4:
     "@socket.io/component-emitter" "~3.1.0"
     debug "~4.3.1"
 
-socket.io@^4.8.1:
+socket.io@4.8.1, socket.io@^4.8.1:
   version "4.8.1"
   resolved "https://registry.yarnpkg.com/socket.io/-/socket.io-4.8.1.tgz#fa0eaff965cc97fdf4245e8d4794618459f7558a"
   integrity sha512-oZ7iUCxph8WYRHHcjBEc9unw3adt5CmSNlppj/5Q4k2RIrhl8Z5yY2Xr4j9zj0+wzVZ0bxmYoGSzKJnRl6A4yg==
@@ -6716,6 +6724,11 @@ uuid@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-10.0.0.tgz#5a95aa454e6e002725c79055fd42aaba30ca6294"
   integrity sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==
+
+uuid@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
+  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
 
 uuid@^8.3.0:
   version "8.3.2"

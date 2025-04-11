@@ -11,6 +11,7 @@ import { ChatbotModule } from './modules/chatbot/chatbot.module'
 import { APP_GUARD } from '@nestjs/core'
 import { ChatbotGuard } from './common/guard/chatbot.guard'
 import { redisStore } from 'cache-manager-redis-yet'
+import { HistoryModule } from './modules/history/history.module'
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -70,6 +71,7 @@ import { redisStore } from 'cache-manager-redis-yet'
     }),
     CrawlerModule,
     ChatbotModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ChatbotGuard }],
